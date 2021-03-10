@@ -1,0 +1,51 @@
+name: Build Releases
+on:
+  release:
+    types: [published]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build-cross:
+    runs-on: ubuntu-latest
+    env:
+      RUST_BACKTRACE: full
+    strategy:
+      matrix:
+        target:
+          - arm-unknown-linux-musleabi
+          - arm-unknown-linux-musleabihf
+          - armv7-unknown-linux-musleabihf
+          - aarch64-unknown-linux-musl
+          - i586-unknown-linux-musl
+          - i686-unknown-linux-musl
+          - mips-unknown-linux-musl
+          - mipsel-unknown-linux-musl
+          - x86_64-unknown-linux-musl
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+        with:
+          repository: 'shadowsocks/shadowsocks-rust'
+          ref: ${{ github.ref }}
+
+      - name: Install Cross
+        run: cargo install cross
+
+      - name: Build ${{ matrix.target }}
+        timeout-minutes: 120
+        env:
+          EXTRA_FEATURES: stream-cipher
+        run: |
+          cd build
+          ./build-release -t ${{ matrix.target }}
+
+      - name: Upload Binaries to Release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ github.token }}
+          file: build/release/*
+          tag: ${{ github.ref }}
+          file_glob: true
