@@ -2,13 +2,15 @@ name: Build Releases
 on:
   release:
     types: [published]
-
+  watch:
+    types: started
 env:
   CARGO_TERM_COLOR: always
 
 jobs:
   build-cross:
     runs-on: ubuntu-latest
+    if: github.event.repository.owner.id == github.event.sender.id
     env:
       RUST_BACKTRACE: full
     strategy:
