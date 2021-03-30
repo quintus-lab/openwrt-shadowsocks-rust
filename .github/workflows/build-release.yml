@@ -25,6 +25,7 @@ jobs:
           - mips-unknown-linux-musl
           - mipsel-unknown-linux-musl
           - x86_64-unknown-linux-musl
+      fail-fast: false
 
     steps:
       - name: Checkout Repo
